@@ -1,13 +1,18 @@
 defmodule Foodguy.RecommendationController do
   use Foodguy.Web, :controller
 
+  @best_order "best"
+  @random_order "random"
+  @order %{best: @best_order, random: @random_order}
+
   def recommendation(conn, params) do
     %{
       "city" => city,
       "country" => country,
       "state" => state,
       "cuisines" => cuisines,
-      "list_size" => list_size
+      "list_size" => list_size,
+      "order" => order
     } = params["result"]["parameters"]
     list_size = String.to_integer(list_size)
 
@@ -18,7 +23,7 @@ defmodule Foodguy.RecommendationController do
         {:ok, city} ->
           case find_restaurants(city, cuisines) do
             {:ok, restaurants} ->
-              json conn, format_restaurants(restaurants, list_size)
+              json conn, format_restaurants(restaurants, list_size, order)
             {:error, reason} ->
               json conn, %{speech: reason}
           end
@@ -110,13 +115,16 @@ defmodule Foodguy.RecommendationController do
     end
   end
 
-  defp format_restaurants(restaurants, list_size) do
+  defp format_restaurants(restaurants, list_size, order) do
+    if order == @order[:random], do: restaurants = Enum.shuffle(restaurants)
+
     desired_restaurants = Enum.take(restaurants, list_size)
     formatted_default_restaurants = desired_restaurants
                                     |> Enum.map(fn restaurant -> restaurant["restaurant"]["name"] end)
                                     |> Enum.join(", ")
     formatted_rich_restaurants = for restaurant <- desired_restaurants, do: format_restaurant(restaurant["restaurant"])
     default_response = "I recommend going to #{formatted_default_restaurants}."
+
     %{
       speech: "I recommend going to #{formatted_default_restaurants}.",
       messages: [%{type: 0, speech: "I have some recommendations!"} | formatted_rich_restaurants]
