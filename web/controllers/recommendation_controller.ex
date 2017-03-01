@@ -1,10 +1,23 @@
 defmodule Foodguy.RecommendationController do
+  @moduledoc """
+  Provides recommendations for places to eat based on cuisine and location
+
+  ## Examples
+  "I want food in Waterloo, ON"
+  "Random sushi in Waterloo, ON"
+  "2 pizza places in Waterloo, ON"
+
+  """
   use Foodguy.Web, :controller
 
   @best_order "best"
   @random_order "random"
   @order %{best: @best_order, random: @random_order}
 
+  @doc """
+  Recommendation entrypoint. Begins recommendation query based on request parameters
+  and returns the recommendations in JSON
+  """
   def recommendation(conn, params) do
     %{
       "city" => city,
@@ -33,14 +46,26 @@ defmodule Foodguy.RecommendationController do
     end
   end
 
+  @doc """
+  Determines if a location is valid by checking its state code and full name
+  against the one provided
+  """
   defp valid_state?(location, state) do
     state == "" || location["state_code"] == state || location["state_name"] == state
   end
 
+  @doc """
+  Determines if a location is valid by checking its full country name against
+  the one provided
+  """
   defp valid_country?(location, country) do
     country == "" || location["country_name"] == country
   end
 
+  @doc """
+  Talks to Zomato to fetch possible city matches for the city query. If successful,
+  calls the matching function
+  """
   defp find_city(city, country, state) do
     res = HTTPoison.get(
       URI.encode("https://developers.zomato.com/api/v2.1/cities?q=#{city}"),
@@ -56,6 +81,9 @@ defmodule Foodguy.RecommendationController do
     end
   end
 
+  @doc """
+  Fetches restaurants based on provided cuisines for a given city and returns the restaurants
+  """
   defp find_restaurants(city, cuisines) do
     case get_cuisines(city, cuisines) do
       {:ok, cuisine_ids} ->
@@ -74,6 +102,10 @@ defmodule Foodguy.RecommendationController do
     end
   end
 
+  @doc """
+  Fetches all cuisines for the given city and gets the ids of the ones that match
+  the cuisines the user is looking for
+  """
   defp get_cuisines(city, cuisines) do
     res = HTTPoison.get(
       "https://developers.zomato.com/api/v2.1/cuisines?city_id=#{city["id"]}",
@@ -92,6 +124,11 @@ defmodule Foodguy.RecommendationController do
     end
   end
 
+  @doc """
+  Matches the cities returned from Zamato against the arguments provided by the user.
+  If there is only 1, instantly matches, 0 returns error, multiple filters by provided
+  location and returns the remaining first (typically best) match
+  """
   defp match_city(locations, city, country, state) do
     cond do
       length(locations) == 1 ->
@@ -115,6 +152,10 @@ defmodule Foodguy.RecommendationController do
     end
   end
 
+  @doc """
+  Transforms the valid restaurants into a useful representation with pertinent
+  information to be consumed by api.ai
+  """
   defp format_restaurants(restaurants, list_size, order) do
     if order == @order[:random], do: restaurants = Enum.shuffle(restaurants)
 
@@ -131,6 +172,9 @@ defmodule Foodguy.RecommendationController do
     }
   end
 
+  @doc """
+  Formats an individual restaurant for api.ai cards with price, rating, link and title
+  """
   defp format_restaurant(restaurant) do
     price = for _ <- 1..restaurant["price_range"], into: "", do: "$"
     %{
