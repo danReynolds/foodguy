@@ -10,13 +10,14 @@ defmodule Foodguy.Router do
   end
 
   pipeline :api do
-    plug :accepts, ["json"]
+    plug :accepts, ["json", "html"]
   end
 
   scope "/", Foodguy do
-    pipe_through :browser # Use the default browser stack
+    pipe_through :api
 
-    get "/", PageController, :index
+    post "/", PageController, :status
+    post "/recommendation", RecommendationController, :recommendation
   end
 
   # Other scopes may use custom stacks.

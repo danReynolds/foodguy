@@ -19,6 +19,10 @@ defmodule Foodguy.Endpoint do
     plug Phoenix.CodeReloader
   end
 
+  # Plug used to assign an action to the request based on the action specified
+  # in the request body
+  plug Foodguy.AssignAction
+
   plug Plug.RequestId
   plug Plug.Logger
 
@@ -39,4 +43,5 @@ defmodule Foodguy.Endpoint do
     signing_salt: "gPjWCyiJ"
 
   plug Foodguy.Router
+
 end

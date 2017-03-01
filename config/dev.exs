@@ -41,3 +41,5 @@ config :foodguy, Foodguy.Repo,
   database: "foodguy_dev",
   hostname: "localhost",
   pool_size: 10
+
+config :foodguy, :zomato, api_token: System.get_env("ZOMATO_API_TOKEN")

@@ -1,7 +1,7 @@
 defmodule Foodguy.PageController do
   use Foodguy.Web, :controller
 
-  def index(conn, _params) do
-    render conn, "index.html"
+  def status(conn, _params) do
+    render conn, "status.json"
   end
 end
