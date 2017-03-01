@@ -6,21 +6,19 @@ defmodule Foodguy.RecommendationController do
       "city" => city,
       "country" => country,
       "state" => state,
-      "cuisines" => cuisines
+      "cuisines" => cuisines,
+      "list_size" => list_size
     } = params["result"]["parameters"]
+    list_size = String.to_integer(list_size)
 
     if city == "" do
-      json conn, %{speech: "In what city will you be eating?"}
+      json conn, %{speech: "In what city and state or country will you be eating?"}
     else
       case find_city(city, country, state) do
         {:ok, city} ->
           case find_restaurants(city, cuisines) do
             {:ok, restaurants} ->
-              formatted_restaurants = restaurants
-                                      |> Enum.take(3)
-                                      |> Enum.map(fn restaurant -> restaurant["restaurant"]["name"] end)
-                                      |> Enum.join(",")
-              json conn, %{speech: "Go to #{formatted_restaurants}"}
+              json conn, format_restaurants(restaurants, list_size)
             {:error, reason} ->
               json conn, %{speech: reason}
           end
@@ -40,7 +38,7 @@ defmodule Foodguy.RecommendationController do
 
   defp find_city(city, country, state) do
     res = HTTPoison.get(
-      "https://developers.zomato.com/api/v2.1/cities?q=#{city}",
+      URI.encode("https://developers.zomato.com/api/v2.1/cities?q=#{city}"),
       ["user-key": Application.get_env(:foodguy, :zomato)[:api_token]]
     )
 
@@ -57,7 +55,7 @@ defmodule Foodguy.RecommendationController do
     case get_cuisines(city, cuisines) do
       {:ok, cuisine_ids} ->
         res = HTTPoison.get(
-          "https://developers.zomato.com/api/v2.1/search?entity_type=city&entity_id=#{city["id"]}&cuisines=#{Enum.join(cuisine_ids, ",")}&sort=rating",
+          URI.encode("https://developers.zomato.com/api/v2.1/search?entity_type=city&entity_id=#{city["id"]}&cuisines=#{Enum.join(cuisine_ids, ",")}&sort=rating"),
           ["user-key": Application.get_env(:foodguy, :zomato)[:api_token]]
         )
         case res do
@@ -97,20 +95,47 @@ defmodule Foodguy.RecommendationController do
         {:error, "A location could not be found by the name #{city}."}
       true ->
         if country == "" && state == "" do
-          {:error, "In which state or country?"}
+          {:error, "In which city and state or country?"}
         else
           valid_locations = locations
                             |> Enum.filter(fn location -> valid_state?(location, state) end)
                             |> Enum.filter(fn location -> valid_country?(location, country) end)
           cond do
-            length(valid_locations) == 1 ->
+            length(valid_locations) == 0 ->
+              {:error, "I was not able to find #{city}."}
+            true ->
               {:ok, hd(valid_locations)}
-            country == "" ->
-              {:error, "In which country?"}
-            state == "" ->
-              {:error, "In which state?"}
           end
         end
     end
+  end
+
+  defp format_restaurants(restaurants, list_size) do
+    desired_restaurants = Enum.take(restaurants, list_size)
+    formatted_default_restaurants = desired_restaurants
+                                    |> Enum.map(fn restaurant -> restaurant["restaurant"]["name"] end)
+                                    |> Enum.join(", ")
+    formatted_rich_restaurants = for restaurant <- desired_restaurants, do: format_restaurant(restaurant["restaurant"])
+    default_response = "I recommend going to #{formatted_default_restaurants}."
+    %{
+      speech: "I recommend going to #{formatted_default_restaurants}.",
+      messages: [%{type: 0, speech: "I have some recommendations!"} | formatted_rich_restaurants]
+    }
+  end
+
+  defp format_restaurant(restaurant) do
+    price = for _ <- 1..restaurant["price_range"], into: "", do: "$"
+    %{
+     type: 1,
+     title: restaurant["name"],
+     subtitle: "Rating: #{restaurant["user_rating"]["aggregate_rating"]}, Price: #{price}",
+     imageUrl: restaurant["thumb"],
+     buttons: [
+       %{
+         text: "View Restaurant",
+         postback: restaurant["url"]
+       }
+     ]
+    }
   end
 end
