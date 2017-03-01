@@ -70,3 +70,5 @@ config :foodguy, Foodguy.Repo,
   url: System.get_env("DATABASE_URL"),
   pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
   ssl: true
+
+config :foodguy, :zomato, api_token: System.get_env("ZOMATO_API_TOKEN")
