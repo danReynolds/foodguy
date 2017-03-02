@@ -82,11 +82,11 @@ defmodule Foodguy.ZomatoApi do
         {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
           all_cuisines = Poison.Parser.parse!(body)["cuisines"]
           new_cuisines = for cuisine <- all_cuisines,
-                                  Enum.member?(new_cuisine_names, cuisine["cuisine"]["cuisine_name"]),
-                                  do: elem(Repo.insert(%Cuisine{
-                                    name: cuisine["cuisine"]["cuisine_name"],
-                                    external_id: cuisine["cuisine"]["cuisine_id"]
-                                  }), 1)
+                                        Enum.member?(new_cuisine_names, cuisine["cuisine"]["cuisine_name"]),
+                                        do: elem(Repo.insert(%Cuisine{
+                                          name: cuisine["cuisine"]["cuisine_name"],
+                                          external_id: cuisine["cuisine"]["cuisine_id"]
+                                        }), 1)
 
           new_cuisine_fields = new_cuisines |> Enum.map(fn cuisine -> {cuisine.name, cuisine.external_id} end)
           {:ok, existing_cuisine_fields ++ new_cuisine_fields}
