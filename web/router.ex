@@ -18,6 +18,9 @@ defmodule Foodguy.Router do
 
     post "/", PageController, :status
     post "/recommendation", RecommendationController, :recommendation
+
+    resources "/cities", CityController
+    resources "/cuisines", CuisineController
   end
 
   # Other scopes may use custom stacks.
