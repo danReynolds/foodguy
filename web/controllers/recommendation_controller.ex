@@ -25,7 +25,7 @@ defmodule Foodguy.RecommendationController do
       "city" => city_name,
       "country" => country,
       "state" => state,
-      "cuisines" => cuisines,
+      "cuisines" => cuisine_names,
       "list_size" => list_size,
       "order" => order
     } = params["result"]["parameters"]
@@ -37,12 +37,12 @@ defmodule Foodguy.RecommendationController do
       if city = Repo.get_by(City, name: city_name, state: state) do
         res = {:ok, city}
       else
-        res = ZomatoApi.create_city(city_name, country, state)
+        res = ZomatoApi.fetch_city(city_name, country, state)
       end
 
       case res do
         {:ok, city} ->
-          case find_restaurants(city, cuisines) do
+          case find_restaurants(city, cuisine_names) do
             {:ok, restaurants} ->
               json conn, format_restaurants(restaurants, list_size, order)
             {:error, reason} ->
@@ -57,43 +57,13 @@ defmodule Foodguy.RecommendationController do
   @doc """
   Fetches restaurants based on provided cuisines for a given city and returns the restaurants
   """
-  defp find_restaurants(city, cuisines) do
-    case get_cuisines(city, cuisines) do
-      {:ok, cuisine_ids} ->
-        res = HTTPoison.get(
-          URI.encode("https://developers.zomato.com/api/v2.1/search?entity_type=city&entity_id=#{city.external_id}&cuisines=#{Enum.join(cuisine_ids, ",")}&sort=rating"),
-          ["user-key": Application.get_env(:foodguy, :zomato)[:api_token]]
-        )
-        case res do
-          {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-            {:ok, Poison.Parser.parse!(body)["restaurants"]}
-          {:error, %HTTPoison.Error{reason: reason}} ->
-            {:error, "There was an error looking for restaurants."}
-        end
+  defp find_restaurants(city, cuisine_names) do
+    case ZomatoApi.fetch_cuisines(city, cuisine_names) do
+      {:ok, cuisine_fields} ->
+        cuisine_ids = cuisine_fields |> Enum.map(fn fields -> elem(fields, 1) end) |> Enum.join(",")
+        ZomatoApi.fetch_restaurants(city, cuisine_ids)
       {:error, reason} ->
         {:error, "There was an error looking for cuisines in #{city.name}."}
-    end
-  end
-
-  @doc """
-  Fetches all cuisines for the given city and gets the ids of the ones that match
-  the cuisines the user is looking for
-  """
-  defp get_cuisines(city, cuisines) do
-    res = HTTPoison.get(
-      "https://developers.zomato.com/api/v2.1/cuisines?city_id=#{city.external_id}",
-      ["user-key": Application.get_env(:foodguy, :zomato)[:api_token]]
-    )
-
-    case res do
-      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-        all_cuisines = Poison.Parser.parse!(body)["cuisines"]
-        verified_cuisines = for cuisine <- all_cuisines,
-                                Enum.member?(cuisines, cuisine["cuisine"]["cuisine_name"]),
-                                do: cuisine["cuisine"]["cuisine_id"]
-        {:ok, verified_cuisines}
-      {:error, %HTTPoison.Error{reason: reason}} ->
-        {:error, "There was an error looking for cuisines."}
     end
   end
 

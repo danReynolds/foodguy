@@ -1,12 +1,30 @@
 defmodule Foodguy.ZomatoApi do
   alias Foodguy.City
+  alias Foodguy.Cuisine
   alias Foodguy.Repo
+  import Ecto.Query, only: [from: 2]
 
   @doc """
-  Talks to Zomato to fetch possible city matches for the city query. If successful,
-  calls the matching function and creates the city.
+  Fetch restaurants for the specified city and cuisines.
   """
-  def create_city(city_name, country, state) do
+  def fetch_restaurants(city, cuisine_ids) do
+    res = HTTPoison.get(
+      URI.encode("https://developers.zomato.com/api/v2.1/search?entity_type=city&entity_id=#{city.external_id}&cuisines=#{cuisine_ids}&sort=rating"),
+      ["user-key": Application.get_env(:foodguy, :zomato)[:api_token]]
+    )
+    case res do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+        {:ok, Poison.Parser.parse!(body)["restaurants"]}
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        {:error, "There was an error looking for restaurants."}
+    end
+  end
+
+  @doc """
+  Fetch possible city matches for the city query. If successful,
+  calls the matching function and creates matched the city.
+  """
+  def fetch_city(city_name, country, state) do
     res = HTTPoison.get(
       URI.encode("https://developers.zomato.com/api/v2.1/cities?q=#{city_name}"),
       ["user-key": Application.get_env(:foodguy, :zomato)[:api_token]]
@@ -35,6 +53,46 @@ defmodule Foodguy.ZomatoApi do
         end
       {:error, %HTTPoison.Error{reason: _reason}} ->
         {:error, "There was an error looking for #{city_name}."}
+    end
+  end
+
+  @doc """
+  Fetches all cuisines for the given city and gets the ids of the ones that match
+  the cuisines the user is looking for. Create any ones that are not found.
+  """
+  def fetch_cuisines(city, cuisine_names) do
+    cuisine_query = from cuisine in "cuisines",
+                    where: cuisine.name in ^cuisine_names,
+                    select: {cuisine.name, cuisine.external_id}
+    existing_cuisine_fields = Repo.all(cuisine_query)
+    new_cuisine_names = MapSet.to_list(
+      MapSet.difference(MapSet.new(cuisine_names),
+      MapSet.new(Enum.map(existing_cuisine_fields, fn fields -> elem(fields, 0) end)))
+    )
+
+    if length(existing_cuisine_fields) == length(cuisine_names) do
+      {:ok, existing_cuisine_fields}
+    else
+      res = HTTPoison.get(
+        "https://developers.zomato.com/api/v2.1/cuisines?city_id=#{city.external_id}",
+        ["user-key": Application.get_env(:foodguy, :zomato)[:api_token]]
+      )
+
+      case res do
+        {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+          all_cuisines = Poison.Parser.parse!(body)["cuisines"]
+          new_cuisines = for cuisine <- all_cuisines,
+                                  Enum.member?(new_cuisine_names, cuisine["cuisine"]["cuisine_name"]),
+                                  do: elem(Repo.insert(%Cuisine{
+                                    name: cuisine["cuisine"]["cuisine_name"],
+                                    external_id: cuisine["cuisine"]["cuisine_id"]
+                                  }), 1)
+
+          new_cuisine_fields = new_cuisines |> Enum.map(fn cuisine -> {cuisine.name, cuisine.external_id} end)
+          {:ok, existing_cuisine_fields ++ new_cuisine_fields}
+        {:error, %HTTPoison.Error{reason: reason}} ->
+          {:error, "There was an error looking for cuisines."}
+      end
     end
   end
 
