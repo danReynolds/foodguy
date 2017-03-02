@@ -88,7 +88,7 @@ defmodule Foodguy.ZomatoApi do
                                           external_id: cuisine["cuisine"]["cuisine_id"]
                                         }), 1)
 
-          new_cuisine_fields = new_cuisines |> Enum.map(fn cuisine -> {cuisine.name, cuisine.external_id} end)
+          new_cuisine_fields = Enum.map(new_cuisines, fn cuisine -> {cuisine.name, cuisine.external_id} end)
           {:ok, existing_cuisine_fields ++ new_cuisine_fields}
         {:error, %HTTPoison.Error{reason: reason}} ->
           {:error, "There was an error looking for cuisines."}
@@ -129,7 +129,7 @@ defmodule Foodguy.ZomatoApi do
   against the one provided
   """
   defp valid_state?(location, state) do
-    state == "" || location["state_code"] == state || location["state_name"] == state
+    state == "" || location["state_name"] == state
   end
 
   @doc """
