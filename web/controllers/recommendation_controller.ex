@@ -34,7 +34,7 @@ defmodule Foodguy.RecommendationController do
     if city_name == "" do
       json conn, %{speech: "In what city and state or country will you be eating?"}
     else
-      if city = Repo.get_by(City, name: city_name, state: state) || Repo.get_by(City, name: city_name, country: contry) do
+      if city = Repo.get_by(City, name: city_name, state: state) || Repo.get_by(City, name: city_name, country: country) do
         res = {:ok, city}
       else
         res = ZomatoApi.fetch_city(city_name, country, state)
