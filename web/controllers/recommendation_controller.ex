@@ -12,10 +12,6 @@ defmodule Foodguy.RecommendationController do
   alias Foodguy.ZomatoApi
   alias Foodguy.City
 
-  @best_order "best"
-  @random_order "random"
-  @order %{best: @best_order, random: @random_order}
-
   @doc """
   Recommendation entrypoint. Begins recommendation query based on request parameters
   and returns the recommendations in JSON
@@ -27,7 +23,7 @@ defmodule Foodguy.RecommendationController do
       "state" => state,
       "cuisines" => cuisine_names,
       "list_size" => list_size,
-      "order" => order
+      "sorting" => sorting,
     } = params["result"]["parameters"]
     list_size = String.to_integer(list_size)
 
@@ -42,9 +38,9 @@ defmodule Foodguy.RecommendationController do
 
       case res do
         {:ok, city} ->
-          case find_restaurants(city, cuisine_names) do
+          case find_restaurants(city, cuisine_names, sorting) do
             {:ok, restaurants} ->
-              json conn, format_restaurants(restaurants, list_size, order)
+              json conn, format_restaurants(restaurants, list_size)
             {:error, reason} ->
               json conn, %{speech: reason}
           end
@@ -57,11 +53,11 @@ defmodule Foodguy.RecommendationController do
   @doc """
   Fetches restaurants based on provided cuisines for a given city and returns the restaurants
   """
-  defp find_restaurants(city, cuisine_names) do
+  defp find_restaurants(city, cuisine_names, sorting) do
     case ZomatoApi.fetch_cuisines(city, cuisine_names) do
       {:ok, cuisine_fields} ->
         cuisine_ids = cuisine_fields |> Enum.map(fn fields -> elem(fields, 1) end) |> Enum.join(",")
-        ZomatoApi.fetch_restaurants(city, cuisine_ids)
+        ZomatoApi.fetch_restaurants(city, cuisine_ids, sorting)
       {:error, reason} ->
         {:error, "There was an error looking for cuisines in #{city.name}."}
     end
@@ -71,9 +67,7 @@ defmodule Foodguy.RecommendationController do
   Transforms the valid restaurants into a useful representation with pertinent
   information to be consumed by api.ai
   """
-  defp format_restaurants(restaurants, list_size, order) do
-    if order == @order[:random], do: restaurants = Enum.shuffle(restaurants)
-
+  defp format_restaurants(restaurants, list_size) do
     desired_restaurants = Enum.take(restaurants, list_size)
     formatted_default_restaurants = desired_restaurants
                                     |> Enum.map(fn restaurant -> restaurant["restaurant"]["name"] end)

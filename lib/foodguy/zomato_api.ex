@@ -4,17 +4,30 @@ defmodule Foodguy.ZomatoApi do
   alias Foodguy.Repo
   import Ecto.Query, only: [from: 2]
 
+  @sorting %{
+    cheapest: %{type: "cost", order: "asc"},
+    priciest: %{type: "cost", order: "desc"},
+    best: %{type: "rating", order: "desc"},
+    worst: %{type: "rating", order: "asc"},
+    random: %{type: "", order: ""}
+  }
+
   @doc """
   Fetch restaurants for the specified city and cuisines.
   """
-  def fetch_restaurants(city, cuisine_ids) do
+  def fetch_restaurants(city, cuisine_ids, sorting) do
+    sort = @sorting[String.to_atom(sorting)]
+
+    IO.puts("https://developers.zomato.com/api/v2.1/search?entity_type=city&entity_id=#{city.external_id}&cuisines=#{cuisine_ids}&sort=#{sort[:type]}&order=#{sort[:order]}")
     res = HTTPoison.get(
-      URI.encode("https://developers.zomato.com/api/v2.1/search?entity_type=city&entity_id=#{city.external_id}&cuisines=#{cuisine_ids}&sort=rating"),
+      URI.encode("https://developers.zomato.com/api/v2.1/search?entity_type=city&entity_id=#{city.external_id}&cuisines=#{cuisine_ids}&sort=#{sort[:type]}&order=#{sort[:order]}"),
       ["user-key": Application.get_env(:foodguy, :zomato)[:api_token]]
     )
     case res do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-        {:ok, Poison.Parser.parse!(body)["restaurants"]}
+        restaurants = Poison.Parser.parse!(body)["restaurants"]
+        if sort[:type] == "", do: restaurants = Enum.shuffle(restaurants)
+        {:ok, restaurants}
       {:error, %HTTPoison.Error{reason: reason}} ->
         {:error, "There was an error looking for restaurants."}
     end
