@@ -14,7 +14,7 @@ Foodguy gives recommendations on places to eat and the questions you ask him can
 
 * Basic: "I want food in Waterloo, ON"
 * Cuisine: "Where can I get pizza in Waterloo, ON?", "I want sushi or dim sum in Toronto, ON"
-* Order: "random pizza in Waterloo, ON", "best Italian in Waterloo, ON"
+* Order: "any pizza in Waterloo, ON", "best Italian in Waterloo, ON", "cheapest Indian food in Waterloo, Ontario"
 * Numericality: "2 sandwich places in Waterloo, ON"
 
 These specifications can also be used in combination to give custom recommmendations. Feel free to create issues if things go wrong and most importantly, happy eating!
