@@ -29,6 +29,4 @@ You can use it on Slack by clicking the button below:
 
 ## Facebook
 
-User it in Messenger by sending a message to Food Guy at the following Facebook page:
-
-https://www.facebook.com/Foodguy-270452376701535/?ref=bookmarks
+User it in Messenger by sending a message to Food Guy at this [Facebook page](https://www.facebook.com/Foodguy-270452376701535/?ref=bookmarks)
