@@ -28,7 +28,14 @@ defmodule Foodguy.RecommendationController do
     list_size = String.to_integer(list_size)
 
     if city_name == "" do
-      json conn, %{speech: "In what city and state or country will you be eating?"}
+      json conn, %{
+        speech: "In what city and state or country will you be eating?",
+        data: %{
+          google: %{
+            expect_user_response: true # Used to keep mic open when a response is needed
+          }
+        }
+      }
     else
       if city = Repo.get_by(City, name: city_name, state: state) || Repo.get_by(City, name: city_name, country: country) do
         res = {:ok, city}
