@@ -17,25 +17,50 @@ defmodule Foodguy.RecommendationController do
   and returns the recommendations in JSON
   """
   def recommendation(conn, params) do
-    IO.puts(inspect(params))
+    api_params = params["result"]["parameters"]
+    if location_params = params["originalRequest"]["data"]["postback"]["data"] do
+      %{
+        "lat" => lat,
+        "long" => lon
+      } = location_params
+      api_params = Map.merge(
+        api_params,
+        %{"city" => "", "country" => "", "state" => "", "lat" => lat, "lon" => lon}
+      )
+    else
+      if api_params["city"] != "" || api_params["country"] != "" || api_params["state"] != "" do
+        api_params = Map.merge(
+          api_params,
+          %{"lat" => "", "lon" => ""}
+        )
+      end
+    end
+
     %{
       "city" => city_name,
       "country" => country,
       "state" => state,
       "cuisines" => cuisine_names,
       "list_size" => list_size,
-      "sorting" => sorting
-    } = params["result"]["parameters"]
+      "sorting" => sorting,
+      "lat" => lat,
+      "lon" => lon
+    } = api_params
     list_size = String.to_integer(list_size)
 
-    if location_params = params["originalRequest"]["data"]["postback"]["data"] do
-      %{
-        "lat" => lat,
-        "long" => long
-      } = location_params
-      case find_restaurants_by_location(lat, long, cuisine_names, sorting) do
+    if lat != "" && lon != "" do
+      if sorting == "", do: sorting = "nearby"
+      case find_restaurants_by_location(lat, lon, cuisine_names, sorting) do
         {:ok, restaurants} ->
-          json conn, format_restaurants(restaurants, list_size)
+          res = format_restaurants(restaurants, list_size)
+          res = Map.put(res, :contextOut, [%{
+            name: "recommendation",
+            lifespan: 5,
+            parameters: Map.merge(
+              params["result"]["parameters"],
+              %{"lat" => lat, "lon" => lon})
+          }])
+          json conn, res
         {:error, reason} ->
           json conn, %{speech: reason}
       end
@@ -50,6 +75,7 @@ defmodule Foodguy.RecommendationController do
 
       case res do
         {:ok, city} ->
+          if sorting == "", do: sorting = "random"
           case find_restaurants_by_city(city, cuisine_names, sorting) do
             {:ok, restaurants} ->
               json conn, format_restaurants(restaurants, list_size)
@@ -82,7 +108,8 @@ defmodule Foodguy.RecommendationController do
   """
   defp find_restaurants_by_city(city, cuisine_names, sorting) do
     case ZomatoApi.fetch_cuisines("https://developers.zomato.com/api/v2.1/cuisines?city_id=#{city.external_id}", cuisine_names) do
-      {:ok, cuisine_ids} ->
+      {:ok, cuisine_fields} ->
+        cuisine_ids = cuisine_fields |> Enum.map(fn fields -> elem(fields, 1) end) |> Enum.join(",")
         ZomatoApi.fetch_restaurants_by_city(city, cuisine_ids, sorting)
       {:error, reason} ->
         {:error, "There was an error looking for cuisines in #{city.name}."}
@@ -94,7 +121,8 @@ defmodule Foodguy.RecommendationController do
   """
   defp find_restaurants_by_location(lat, lon, cuisine_names, sorting) do
     case ZomatoApi.fetch_cuisines("https://developers.zomato.com/api/v2.1/cuisines?lat=#{lat}&lon=#{lon}", cuisine_names) do
-      {:ok, cuisine_ids} ->
+      {:ok, cuisine_fields} ->
+        cuisine_ids = cuisine_fields |> Enum.map(fn fields -> elem(fields, 1) end) |> Enum.join(",")
         ZomatoApi.fetch_restaurants_by_location(lat, lon, cuisine_ids, sorting)
       {:error, reason} ->
         {:error, "There was an error looking for cuisines in your specified location."}

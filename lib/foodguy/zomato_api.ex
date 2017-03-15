@@ -9,7 +9,8 @@ defmodule Foodguy.ZomatoApi do
     priciest: %{type: "cost", order: "desc"},
     best: %{type: "rating", order: "desc"},
     worst: %{type: "rating", order: "asc"},
-    random: %{type: "", order: ""}
+    random: %{type: "", order: ""},
+    nearby: %{type: "", order: ""}
   }
 
   @doc """
@@ -17,6 +18,7 @@ defmodule Foodguy.ZomatoApi do
   """
   def fetch_restaurants(url, sorting, cuisine_ids) do
     sort = @sorting[String.to_atom(sorting)]
+
     res = HTTPoison.get(
       URI.encode("#{url}&sort=#{sort[:type]}&order=#{sort[:order]}&cuisines=#{cuisine_ids}"),
       ["user-key": Application.get_env(:foodguy, :zomato)[:api_token]]
@@ -24,7 +26,7 @@ defmodule Foodguy.ZomatoApi do
     case res do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         restaurants = Poison.Parser.parse!(body)["restaurants"]
-        if sort[:type] == "", do: restaurants = Enum.shuffle(restaurants)
+        if sorting == "random", do: restaurants = Enum.shuffle(restaurants)
         {:ok, restaurants}
       {:error, %HTTPoison.Error{reason: reason}} ->
         {:error, "There was an error looking for restaurants."}
@@ -113,8 +115,7 @@ defmodule Foodguy.ZomatoApi do
                                         }), 1)
 
           new_cuisine_fields = Enum.map(new_cuisines, fn cuisine -> {cuisine.name, cuisine.external_id} end)
-          all_cuisine_ids = (existing_cuisine_fields ++ new_cuisine_fields) |> Enum.map(fn fields -> elem(fields, 1) end) |> Enum.join(",")
-          {:ok, all_cuisine_ids}
+          {:ok, existing_cuisine_fields ++ new_cuisine_fields}
         {:error, %HTTPoison.Error{reason: reason}} ->
           {:error, "There was an error looking for cuisines."}
       end
