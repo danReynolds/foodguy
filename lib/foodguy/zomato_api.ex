@@ -9,24 +9,24 @@ defmodule Foodguy.ZomatoApi do
     priciest: %{type: "cost", order: "desc"},
     best: %{type: "rating", order: "desc"},
     worst: %{type: "rating", order: "asc"},
-    random: %{type: "", order: ""}
+    random: %{type: "", order: ""},
+    nearby: %{type: "", order: ""}
   }
 
   @doc """
   Fetch restaurants for the specified city and cuisines.
   """
-  def fetch_restaurants(city, cuisine_ids, sorting) do
+  def fetch_restaurants(url, sorting, cuisine_ids) do
     sort = @sorting[String.to_atom(sorting)]
 
-    IO.puts("https://developers.zomato.com/api/v2.1/search?entity_type=city&entity_id=#{city.external_id}&cuisines=#{cuisine_ids}&sort=#{sort[:type]}&order=#{sort[:order]}")
     res = HTTPoison.get(
-      URI.encode("https://developers.zomato.com/api/v2.1/search?entity_type=city&entity_id=#{city.external_id}&cuisines=#{cuisine_ids}&sort=#{sort[:type]}&order=#{sort[:order]}"),
+      URI.encode("#{url}&sort=#{sort[:type]}&order=#{sort[:order]}&cuisines=#{cuisine_ids}"),
       ["user-key": Application.get_env(:foodguy, :zomato)[:api_token]]
     )
     case res do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         restaurants = Poison.Parser.parse!(body)["restaurants"]
-        if sort[:type] == "", do: restaurants = Enum.shuffle(restaurants)
+        if sorting == "random", do: restaurants = Enum.shuffle(restaurants)
         {:ok, restaurants}
       {:error, %HTTPoison.Error{reason: reason}} ->
         {:error, "There was an error looking for restaurants."}
@@ -34,10 +34,26 @@ defmodule Foodguy.ZomatoApi do
   end
 
   @doc """
+  Fetch possible city matches for the city query latitude and longitude. If
+  successful takes the only result and creates the city if needed.
+  """
+  def fetch_restaurants_by_city(city, cuisine_ids, sorting) do
+    fetch_restaurants("https://developers.zomato.com/api/v2.1/search?entity_type=city&entity_id=#{city.external_id}", sorting, cuisine_ids)
+  end
+
+  @doc """
+  Fetch possible city matches for the city query latitude and longitude. If
+  successful takes the only result and creates the city if needed.
+  """
+  def fetch_restaurants_by_location(lat, lon, cuisine_ids, sorting) do
+    fetch_restaurants("https://developers.zomato.com/api/v2.1/search?lat=#{lat}&lon=#{lon}", sorting, cuisine_ids)
+  end
+
+  @doc """
   Fetch possible city matches for the city query. If successful,
   calls the matching function and creates matched the city.
   """
-  def fetch_city(city_name, country, state) do
+  defp fetch_city(city_name, country, state) do
     res = HTTPoison.get(
       URI.encode("https://developers.zomato.com/api/v2.1/cities?q=#{city_name}"),
       ["user-key": Application.get_env(:foodguy, :zomato)[:api_token]]
@@ -73,7 +89,7 @@ defmodule Foodguy.ZomatoApi do
   Fetches all cuisines for the given city and gets the ids of the ones that match
   the cuisines the user is looking for. Create any ones that are not found.
   """
-  def fetch_cuisines(city, cuisine_names) do
+  def fetch_cuisines(url, cuisine_names) do
     cuisine_query = from cuisine in "cuisines",
                     where: cuisine.name in ^cuisine_names,
                     select: {cuisine.name, cuisine.external_id}
@@ -86,10 +102,7 @@ defmodule Foodguy.ZomatoApi do
     if length(existing_cuisine_fields) == length(cuisine_names) do
       {:ok, existing_cuisine_fields}
     else
-      res = HTTPoison.get(
-        "https://developers.zomato.com/api/v2.1/cuisines?city_id=#{city.external_id}",
-        ["user-key": Application.get_env(:foodguy, :zomato)[:api_token]]
-      )
+      res = HTTPoison.get(url, ["user-key": Application.get_env(:foodguy, :zomato)[:api_token]])
 
       case res do
         {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
