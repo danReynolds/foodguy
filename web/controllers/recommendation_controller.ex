@@ -56,9 +56,7 @@ defmodule Foodguy.RecommendationController do
           res = Map.put(res, :contextOut, [%{
             name: "recommendation",
             lifespan: 5,
-            parameters: Map.merge(
-              params["result"]["parameters"],
-              %{"lat" => lat, "lon" => lon})
+            parameters: api_params
           }])
           json conn, res
         {:error, reason} ->
@@ -78,7 +76,13 @@ defmodule Foodguy.RecommendationController do
           if sorting == "", do: sorting = "random"
           case find_restaurants_by_city(city, cuisine_names, sorting) do
             {:ok, restaurants} ->
-              json conn, format_restaurants(restaurants, list_size)
+              res = format_restaurants(restaurants, list_size)
+              res = Map.put(res, :contextOut, [%{
+                name: "recommendation",
+                lifespan: 5,
+                parameters: api_params
+              }])
+              json conn, res
             {:error, reason} ->
               json conn, %{speech: reason}
           end
