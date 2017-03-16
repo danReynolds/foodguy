@@ -53,7 +53,7 @@ defmodule Foodguy.ZomatoApi do
   Fetch possible city matches for the city query. If successful,
   calls the matching function and creates matched the city.
   """
-  defp fetch_city(city_name, country, state) do
+  def fetch_city(city_name, country, state) do
     res = HTTPoison.get(
       URI.encode("https://developers.zomato.com/api/v2.1/cities?q=#{city_name}"),
       ["user-key": Application.get_env(:foodguy, :zomato)[:api_token]]
