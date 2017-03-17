@@ -18,6 +18,7 @@ defmodule Foodguy.RecommendationController do
   """
   def recommendation(conn, params) do
     api_params = params["result"]["parameters"]
+    IO.puts(inspect(api_params))
     if location_params = params["originalRequest"]["data"]["postback"]["data"] do
       %{
         "lat" => lat,
@@ -58,6 +59,7 @@ defmodule Foodguy.RecommendationController do
             lifespan: 5,
             parameters: api_params
           }])
+          IO.puts(inspect(res))
           json conn, res
         {:error, reason} ->
           json conn, %{speech: reason}
@@ -82,6 +84,7 @@ defmodule Foodguy.RecommendationController do
                 lifespan: 5,
                 parameters: api_params
               }])
+              IO.puts(inspect(res))
               json conn, res
             {:error, reason} ->
               json conn, %{speech: reason}

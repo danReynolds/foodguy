@@ -17,3 +17,5 @@ config :foodguy, Foodguy.Repo,
   database: "foodguy_test",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
+
+config :foodguy, :zomato, api_token: System.get_env("ZOMATO_API_TOKEN")

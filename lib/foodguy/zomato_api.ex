@@ -23,6 +23,7 @@ defmodule Foodguy.ZomatoApi do
       URI.encode("#{url}&sort=#{sort[:type]}&order=#{sort[:order]}&cuisines=#{cuisine_ids}"),
       ["user-key": Application.get_env(:foodguy, :zomato)[:api_token]]
     )
+    IO.puts("#{url}&sort=#{sort[:type]}&order=#{sort[:order]}&cuisines=#{cuisine_ids}")
     case res do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         restaurants = Poison.Parser.parse!(body)["restaurants"]
