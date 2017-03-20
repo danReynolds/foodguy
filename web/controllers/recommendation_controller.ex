@@ -9,7 +9,7 @@ defmodule Foodguy.RecommendationController do
 
   """
   use Foodguy.Web, :controller
-  alias Foodguy.ZomatoApi
+  alias Foodguy.ZomatoFetcher
   alias Foodguy.City
 
   @doc """
@@ -18,7 +18,6 @@ defmodule Foodguy.RecommendationController do
   """
   def recommendation(conn, params) do
     api_params = params["result"]["parameters"]
-    IO.puts(inspect(api_params))
     if location_params = params["originalRequest"]["data"]["postback"]["data"] do
       %{
         "lat" => lat,
@@ -59,7 +58,6 @@ defmodule Foodguy.RecommendationController do
             lifespan: 5,
             parameters: api_params
           }])
-          IO.puts(inspect(res))
           json conn, res
         {:error, reason} ->
           json conn, %{speech: reason}
@@ -69,7 +67,7 @@ defmodule Foodguy.RecommendationController do
         if city = Repo.get_by(City, name: city_name, state: state) || Repo.get_by(City, name: city_name, country: country) do
           res = {:ok, city}
         else
-          res = ZomatoApi.fetch_city(city_name, country, state)
+          res = ZomatoFetcher.fetch_city(city_name, country, state)
         end
       end
 
@@ -84,7 +82,6 @@ defmodule Foodguy.RecommendationController do
                 lifespan: 5,
                 parameters: api_params
               }])
-              IO.puts(inspect(res))
               json conn, res
             {:error, reason} ->
               json conn, %{speech: reason}
@@ -114,12 +111,12 @@ defmodule Foodguy.RecommendationController do
   Fetches restaurants based on provided cuisines for a given city and returns the restaurants
   """
   defp find_restaurants_by_city(city, cuisine_names, sorting) do
-    case ZomatoApi.fetch_cuisines("https://developers.zomato.com/api/v2.1/cuisines?city_id=#{city.external_id}", cuisine_names) do
+    case ZomatoFetcher.fetch_cuisines_by_city(city.external_id, cuisine_names) do
       {:ok, cuisine_fields} ->
         cuisine_ids = cuisine_fields |> Enum.map(fn fields -> elem(fields, 1) end) |> Enum.join(",")
-        ZomatoApi.fetch_restaurants_by_city(city, cuisine_ids, sorting)
-      {:error, reason} ->
-        {:error, "There was an error looking for cuisines in #{city.name}."}
+        ZomatoFetcher.fetch_restaurants_by_city(city.external_id, sorting, cuisine_ids)
+      {:error, error} ->
+        {:error, error}
     end
   end
 
@@ -127,10 +124,10 @@ defmodule Foodguy.RecommendationController do
   Fetches restaurants based on provided cuisines for a given city and returns the restaurants
   """
   defp find_restaurants_by_location(lat, lon, cuisine_names, sorting) do
-    case ZomatoApi.fetch_cuisines("https://developers.zomato.com/api/v2.1/cuisines?lat=#{lat}&lon=#{lon}", cuisine_names) do
+    case ZomatoFetcher.fetch_cuisines(lat, lon, cuisine_names) do
       {:ok, cuisine_fields} ->
         cuisine_ids = cuisine_fields |> Enum.map(fn fields -> elem(fields, 1) end) |> Enum.join(",")
-        ZomatoApi.fetch_restaurants_by_location(lat, lon, cuisine_ids, sorting)
+        ZomatoFetcher.fetch_restaurants_by_location(lat, lon, sorting, cuisine_ids)
       {:error, reason} ->
         {:error, "There was an error looking for cuisines in your specified location."}
     end

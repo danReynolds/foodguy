@@ -2,6 +2,7 @@ defmodule Foodguy.CityControllerTest do
   use Foodguy.ConnCase
 
   alias Foodguy.City
+  import Mock
 
   def req_data(api, responses, action) do
     %{
@@ -25,8 +26,9 @@ defmodule Foodguy.CityControllerTest do
   describe "POST recommendation/2" do
     test "", %{conn: conn, api: api, responses: responses} do
       %{body: body, response: response} = req_data(api, responses, "Recommendation")
-      IO.puts(inspect(response))
-      conn = post conn, "/recommendation", body
+      with_mock HTTPoison, [get: fn(_url) -> response end] do
+        conn = post conn, "/recommendation", body
+      end
       assert json_response(conn, 200)["speech"] =~ response["speech"]
     end
   end
