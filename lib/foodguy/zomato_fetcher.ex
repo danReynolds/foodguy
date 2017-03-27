@@ -79,15 +79,15 @@ defmodule Foodguy.ZomatoFetcher do
               }
             )
             case Repo.insert(changeset) do
-              {:ok, city} ->
-                {:ok, city}
+              {:ok, _city} = new_city ->
+                new_city
               {:error, _changeset} ->
                 {:error, "There was a problem with the data for this city."}
             end
           {:error, reason} ->
             {:error, reason}
-          {:error} ->
-            {:error}
+          {:error} = match_error ->
+            match_error
         end
       {:error} ->
         {:error, "There was an error looking for #{city_name}."}
@@ -147,8 +147,8 @@ defmodule Foodguy.ZomatoFetcher do
     case res do
       {:ok, cuisine_fields} ->
         {:ok, cuisine_fields |> Enum.map(fn fields -> elem(fields, 1) end) |> Enum.join(",")}
-      {:error, error} ->
-        {:error, error}
+      {:error, _error} = cuisine_error ->
+        cuisine_error
     end
   end
 
