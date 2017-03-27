@@ -37,7 +37,7 @@ defmodule Foodguy.CityControllerTest do
         [get: fn(url) -> raise "Web Request made" end]
       }]) do
         conn = post conn, "/recommendation", body
-        assert json_response(conn, 200) == test_response["value"]["speech"]
+        assert json_response(conn, 200) == test_response["value"]
       end
     end
   end

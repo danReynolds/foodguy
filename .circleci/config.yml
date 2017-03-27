@@ -9,6 +9,7 @@ jobs:
           POSTGRES_USER: ubuntu
     steps:
       - checkout
+      - run: mkdir -p $CIRCLE_TEST_REPORTS/exunit
       - run: mix deps.get
       - run: mix ecto.create
       - run: mix test
