@@ -79,7 +79,6 @@ defmodule Foodguy.RecommendationController do
   defp find_restaurants_by_city(city, cuisine_names, sorting) do
     case ZomatoFetcher.fetch_cuisines_by_city(city.external_id, cuisine_names) do
       {:ok, cuisine_ids} ->
-        IO.puts(inspect(cuisine_ids))
         ZomatoFetcher.fetch_restaurants_by_city(city.external_id, sorting, cuisine_ids)
       {:error, error} ->
         {:error, error}
@@ -92,7 +91,6 @@ defmodule Foodguy.RecommendationController do
   defp find_restaurants_by_location(lat, lon, cuisine_names, sorting) do
     case ZomatoFetcher.fetch_cuisines_by_location(lat, lon, cuisine_names) do
       {:ok, cuisine_ids} ->
-        IO.puts(inspect(cuisine_ids))
         ZomatoFetcher.fetch_restaurants_by_location(lat, lon, sorting, cuisine_ids)
       {:error, reason} ->
         {:error, "There was an error looking for cuisines in your specified location."}
