@@ -13,8 +13,8 @@ defmodule Foodguy.RecommendationController do
   alias Foodguy.City
 
   @doc """
-  Recommendation entrypoint. Begins recommendation query based on request parameters
-  and returns the recommendations in JSON
+  Begins recommendation query based on request parameters and returns the speech
+  JSON used by API.AI
   """
   def recommendation(conn, params) do
     api_params = update_location_params(params)
@@ -65,6 +65,7 @@ defmodule Foodguy.RecommendationController do
       end
     end
 
+    # Sets the new context to be used by API.AI, varies based on city vs lat/lon queries
     res = Map.put(res, :contextOut, [%{
       name: "recommendation",
       lifespan: 5,
@@ -73,9 +74,6 @@ defmodule Foodguy.RecommendationController do
     json conn, res
   end
 
-  @doc """
-  Fetches restaurants based on provided cuisines for a given city and returns the restaurants
-  """
   defp find_restaurants_by_city(city, cuisine_names, sorting) do
     case ZomatoFetcher.fetch_cuisines_by_city(city.external_id, cuisine_names) do
       {:ok, cuisine_ids} ->
@@ -86,7 +84,7 @@ defmodule Foodguy.RecommendationController do
   end
 
   @doc """
-  Fetches restaurants based on provided cuisines for a given city and returns the restaurants
+  Fetches restaurants based on provided cuisines for a given lat/lon and returns the restaurants
   """
   defp find_restaurants_by_location(lat, lon, cuisine_names, sorting) do
     case ZomatoFetcher.fetch_cuisines_by_location(lat, lon, cuisine_names) do
@@ -97,10 +95,6 @@ defmodule Foodguy.RecommendationController do
     end
   end
 
-  @doc """
-  Transforms the valid restaurants into a useful representation with pertinent
-  information to be consumed by api.ai
-  """
   defp format_restaurants(restaurants, list_size) do
     desired_restaurants = Enum.take(restaurants, list_size)
     formatted_default_restaurants = desired_restaurants
@@ -113,9 +107,6 @@ defmodule Foodguy.RecommendationController do
     }
   end
 
-  @doc """
-  Formats an individual restaurant for api.ai cards with price, rating, link and title
-  """
   defp format_restaurant(restaurant) do
     price = for _ <- 1..restaurant["price_range"], into: "", do: "$"
     %{

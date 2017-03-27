@@ -5,6 +5,7 @@ defmodule Foodguy.ZomatoFetcher do
   alias Foodguy.ZomatoApi
   import Ecto.Query, only: [from: 2]
 
+  # Sorting types sent by API.AI mapped to Zomato query params "type" and "order"
   @sorting %{
     cheapest: %{type: "cost", order: "asc"},
     priciest: %{type: "cost", order: "desc"},
@@ -14,6 +15,10 @@ defmodule Foodguy.ZomatoFetcher do
     nearby: %{type: "", order: ""}
   }
 
+  @doc """
+  Assembles params including city entity id to be sent with API call to get
+  restaurants and fetches them
+  """
   def fetch_restaurants_by_city(id, sorting, cuisine_ids) do
     sort = @sorting[String.to_atom(sorting)]
     params = %{
@@ -27,8 +32,8 @@ defmodule Foodguy.ZomatoFetcher do
   end
 
   @doc """
-  Fetch possible city matches for the city query latitude and longitude. If
-  successful takes the only result and creates the city if needed.
+  Assembles params including lat/lon to be sent with API call to get restaurants
+  and fetches them
   """
   def fetch_restaurants_by_location(lat, lon, sorting, cuisine_ids) do
     sort = @sorting[String.to_atom(sorting)]
@@ -43,7 +48,7 @@ defmodule Foodguy.ZomatoFetcher do
   end
 
   @doc """
-  Fetch restaurants for the specified city and cuisines.
+  Fetch restaurants for the specified city or lat/long and cuisines.
   """
   def fetch_restaurants(params, sorting) do
     case ZomatoApi.get_url(:restaurants, params) do
@@ -57,8 +62,8 @@ defmodule Foodguy.ZomatoFetcher do
   end
 
   @doc """
-  Fetch possible city matches for the city query. If successful,
-  calls the matching function and creates matched the city.
+  Fetch cities based on user query and matches them against the provided
+  city and state. Creates a city if a likely match is found.
   """
   def fetch_city(city_name, country, state) do
     case ZomatoApi.get_url(:cities, %{q: city_name}) do
@@ -89,11 +94,17 @@ defmodule Foodguy.ZomatoFetcher do
     end
   end
 
+  @doc """
+  Fetches cuisines for an area by city id
+  """
   def fetch_cuisines_by_city(id, cuisine_names) do
     params = %{city_id: id}
     fetch_cuisines(params, cuisine_names)
   end
 
+  @doc """
+  Fetches cuisines for an area by lat/lon
+  """
   def fetch_cuisines_by_location(lat, lon, cuisine_names) do
     params = %{lat: lat, lon: lon}
     fetch_cuisines(params, cuisine_names)
@@ -142,9 +153,11 @@ defmodule Foodguy.ZomatoFetcher do
   end
 
   @doc """
-  Matches the cities returned from Zamato against the arguments provided by the user.
-  If there is only 1, instantly matches, 0 returns error, multiple filters by provided
-  location and returns the remaining first (typically best) match
+  Matches the cities returned from Zomato API against the city and state provided
+  by the user.
+  0 matches: Returns indication that matching failed
+  1 match: Returns only match
+  >1 matches: Returns first match
   """
   defp match_city(locations, city_name, country, state) do
     cond do
