@@ -2,6 +2,7 @@ defmodule Foodguy.ZomatoFetcher do
   alias Foodguy.City
   alias Foodguy.Cuisine
   alias Foodguy.Repo
+  alias Foodguy.ZomatoApi
   import Ecto.Query, only: [from: 2]
 
   @sorting %{
@@ -22,7 +23,7 @@ defmodule Foodguy.ZomatoFetcher do
       order: sort[:order],
       cuisines: cuisine_ids
     }
-    fetch_restaurants(params)
+    fetch_restaurants(params, sorting)
   end
 
   @doc """
@@ -38,13 +39,13 @@ defmodule Foodguy.ZomatoFetcher do
       order: sort[:order],
       cuisines: cuisine_ids
     }
-    fetch_restaurants(params)
+    fetch_restaurants(params, sorting)
   end
 
   @doc """
   Fetch restaurants for the specified city and cuisines.
   """
-  def fetch_restaurants(params) do
+  def fetch_restaurants(params, sorting) do
     case ZomatoApi.get_url(:restaurants, params) do
       {:ok, res} ->
         restaurants = res["restaurants"]
@@ -60,7 +61,7 @@ defmodule Foodguy.ZomatoFetcher do
   calls the matching function and creates matched the city.
   """
   def fetch_city(city_name, country, state) do
-    case get_url(:cities, %{q: city_name}) do
+    case ZomatoApi.get_url(:cities, %{q: city_name}) do
       {:ok, res} ->
         locations = res["location_suggestions"]
         case match_city(locations, city_name, country, state) do
@@ -111,11 +112,11 @@ defmodule Foodguy.ZomatoFetcher do
     )
 
     if length(existing_cuisine_fields) == length(cuisine_names) do
-      {:ok, existing_cuisine_fields}
+      res = {:ok, existing_cuisine_fields}
     else
-      case get_url(:cuisines, params) do
-        {:ok, res} ->
-          all_cuisines = res["cuisines"]
+      case ZomatoApi.get_url(:cuisines, params) do
+        {:ok, data} ->
+          all_cuisines = data["cuisines"]
           new_cuisines = for cuisine <- all_cuisines,
                                         Enum.member?(new_cuisine_names, cuisine["cuisine"]["cuisine_name"]),
                                         do: elem(Repo.insert(%Cuisine{
@@ -123,11 +124,18 @@ defmodule Foodguy.ZomatoFetcher do
                                           external_id: cuisine["cuisine"]["cuisine_id"]
                                         }), 1)
 
-          new_cuisine_fields = Enum.map(new_cuisines, fn cuisine -> {cuisine.name, cuisine.external_id} end)
-          {:ok, existing_cuisine_fields ++ new_cuisine_fields}
+          all_cuisine_fields = existing_cuisine_fields ++ Enum.map(new_cuisines, fn cuisine -> {cuisine.name, cuisine.external_id} end)
+          res = {:ok, all_cuisine_fields}
         {:error} ->
-          {:error, "There was an error looking for cuisines."}
+          res = {:error, "There was an error looking for cuisines."}
       end
+    end
+
+    case res do
+      {:ok, cuisine_fields} ->
+        {:ok, cuisine_fields |> Enum.map(fn fields -> elem(fields, 1) end) |> Enum.join(",")}
+      {:error, error} ->
+        {:error, error}
     end
   end
 

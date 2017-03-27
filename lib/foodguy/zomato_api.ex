@@ -8,13 +8,15 @@ defmodule Foodguy.ZomatoApi do
   }
 
   def get_url(url, params) do
-    url_params = url_params |> Enum.map(fn({k, v} -> "#{k}=#{v}" end) |> Enum.join("&")
+    url_params = params
+                 |> Enum.filter_map(fn {k, v} -> v != "" end, fn {k, v} -> "#{k}=#{v}" end)
+                 |> Enum.join("&")
     uri = URI.encode("#{@api[url]}?#{url_params}")
-    res = HTTPoison.get(url, ["user-key": Application.get_env(:foodguy, :zomato)[:api_token]])
+    res = HTTPoison.get(uri, ["user-key": Application.get_env(:foodguy, :zomato)[:api_token]])
 
     case res do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-        Poison.Parser.parse!(body)
+        {:ok, Poison.Parser.parse!(body)}
       {:error, %HTTPoison.Error{reason: reason}} ->
         {:error}
     end
