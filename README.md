@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/danReynolds/foodguy.svg?style=svg)](https://circleci.com/gh/danReynolds/foodguy)
+
 # Foodguy
 
 <iframe
