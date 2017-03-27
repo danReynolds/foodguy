@@ -39,6 +39,7 @@ defmodule Foodguy.Mixfile do
      {:gettext, "~> 0.11"},
      {:cowboy, "~> 1.0"},
      {:mock, "~> 0.2.0", only: :test},
+     {:junit_formatter, "~> 1.3", only: [:test]},
      {:httpoison, "~> 0.10.0"}]
   end
 

@@ -9,7 +9,7 @@ defmodule Foodguy.ZomatoApi do
 
   def get_url(api_key, params) do
     url_params = params
-                 |> Enum.filter_map(fn {k, v} -> v != "" end, fn {k, v} -> "#{k}=#{v}" end)
+                 |> Enum.filter_map(fn {_, v} -> v != "" end, fn {k, v} -> "#{k}=#{v}" end)
                  |> Enum.join("&")
     uri = URI.encode("#{@api[api_key]}?#{url_params}")
     res = HTTPoison.get(uri, ["user-key": Application.get_env(:foodguy, :zomato)[:api_token]])
