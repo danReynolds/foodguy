@@ -17,3 +17,11 @@ config :foodguy, Foodguy.Repo,
   database: "foodguy_test",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
+
+config :foodguy, :zomato, api_token: System.get_env("ZOMATO_API_TOKEN")
+
+# Used to generate a JUnit XML format of test results for services like CircleCi
+config :junit_formatter,
+  report_file: "report_file_test.xml",
+  report_dir: "#{System.get_env("CIRCLE_TEST_REPORTS")}/exunit",
+  print_report_file: true
