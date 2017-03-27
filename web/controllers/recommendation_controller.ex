@@ -17,25 +17,7 @@ defmodule Foodguy.RecommendationController do
   and returns the recommendations in JSON
   """
   def recommendation(conn, params) do
-    api_params = params["result"]["parameters"]
-    if location_params = params["originalRequest"]["data"]["postback"]["data"] do
-      %{
-        "lat" => lat,
-        "long" => lon
-      } = location_params
-      api_params = Map.merge(
-        api_params,
-        %{"city" => "", "country" => "", "state" => "", "lat" => lat, "lon" => lon}
-      )
-    else
-      if api_params["city"] != "" || api_params["country"] != "" || api_params["state"] != "" do
-        api_params = Map.merge(
-          api_params,
-          %{"lat" => "", "lon" => ""}
-        )
-      end
-    end
-
+    api_params = update_location_params(params)
     %{
       "city" => city_name,
       "country" => country,
@@ -53,58 +35,42 @@ defmodule Foodguy.RecommendationController do
       case find_restaurants_by_location(lat, lon, cuisine_names, sorting) do
         {:ok, restaurants} ->
           res = format_restaurants(restaurants, list_size)
-          res = Map.put(res, :contextOut, [%{
-            name: "recommendation",
-            lifespan: 5,
-            parameters: api_params
-          }])
-          json conn, res
         {:error, reason} ->
-          json conn, %{speech: reason}
+          res = %{speech: reason}
       end
     else
       if city_name != "" do
         if city = Repo.get_by(City, name: city_name, state: state) || Repo.get_by(City, name: city_name, country: country) do
-          res = {:ok, city}
+          data = {:ok, city}
         else
-          res = ZomatoFetcher.fetch_city(city_name, country, state)
+          data = ZomatoFetcher.fetch_city(city_name, country, state)
         end
       end
 
-      case res do
+      case data do
         {:ok, city} ->
           if sorting == "", do: sorting = "random"
           case find_restaurants_by_city(city, cuisine_names, sorting) do
             {:ok, restaurants} ->
               res = format_restaurants(restaurants, list_size)
-              res = Map.put(res, :contextOut, [%{
-                name: "recommendation",
-                lifespan: 5,
-                parameters: api_params
-              }])
-              json conn, res
             {:error, reason} ->
-              json conn, %{speech: reason}
+              res = %{speech: reason}
           end
         {:error, reason} ->
-          json conn, %{speech: reason}
+          res = %{speech: reason}
+        {:error} ->
+          res = ask_for_location_response
         nil ->
-          json conn, %{
-            speech: "In what city and state or country will you be eating?",
-            data: %{
-              google: %{
-                expect_user_response: true # Used to keep mic open when a response is needed
-              },
-              facebook: %{
-                text: "Specify your city and state or country or share your location.",
-                quick_replies: [%{
-                  content_type: "location"
-                }]
-              }
-            }
-          }
+          res = ask_for_location_response
       end
     end
+
+    res = Map.put(res, :contextOut, [%{
+      name: "recommendation",
+      lifespan: 5,
+      parameters: api_params
+    }])
+    json conn, res
   end
 
   @doc """
@@ -168,5 +134,41 @@ defmodule Foodguy.RecommendationController do
        }
      ]
     }
+  end
+
+  defp ask_for_location_response do
+    %{
+     speech: "In what city and state or country will you be eating?",
+     data: %{
+       google: %{
+         expect_user_response: true # Used to keep mic open when a response is needed
+       },
+       facebook: %{
+         text: "Specify your city and state or country or share your location.",
+         quick_replies: [%{content_type: "location"}]
+       }
+     }
+   }
+  end
+
+  defp update_location_params(params) do
+    api_params = params["result"]["parameters"]
+    if location_params = params["originalRequest"]["data"]["postback"]["data"] do
+      %{
+        "lat" => lat,
+        "long" => lon
+      } = location_params
+      api_params = Map.merge(
+        api_params,
+        %{"city" => "", "country" => "", "state" => "", "lat" => lat, "lon" => lon}
+      )
+    else
+      if api_params["city"] != "" || api_params["country"] != "" || api_params["state"] != "" do
+        api_params = Map.merge(
+          api_params,
+          %{"lat" => "", "lon" => ""}
+        )
+      end
+    end
   end
 end

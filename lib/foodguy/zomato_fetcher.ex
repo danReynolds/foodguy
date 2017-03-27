@@ -81,6 +81,8 @@ defmodule Foodguy.ZomatoFetcher do
             end
           {:error, reason} ->
             {:error, reason}
+          {:error} ->
+            {:error}
         end
       {:error} ->
         {:error, "There was an error looking for #{city_name}."}
@@ -152,7 +154,7 @@ defmodule Foodguy.ZomatoFetcher do
         {:error, "A location could not be found with name #{city_name}."}
       true ->
         if country == "" && state == "" do
-          {:error, "In which city and state or country?"}
+          {:error}
         else
           valid_locations = locations
                             |> Enum.filter(fn location -> valid_state?(location, state) end)
