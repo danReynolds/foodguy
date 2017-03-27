@@ -1,6 +1,4 @@
 defmodule Foodguy.ZomatoApi do
-  @restaurants_url "https://developers.zomato.com/api/v2.1/search"
-
   @api %{
     restaurants: "https://developers.zomato.com/api/v2.1/search",
     cities: "https://developers.zomato.com/api/v2.1/cities",
@@ -17,7 +15,7 @@ defmodule Foodguy.ZomatoApi do
     case res do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         {:ok, Poison.Parser.parse!(body)}
-      {:error, %HTTPoison.Error{reason: reason}} ->
+      {:error, %HTTPoison.Error{reason: _reason}} ->
         {:error}
     end
   end

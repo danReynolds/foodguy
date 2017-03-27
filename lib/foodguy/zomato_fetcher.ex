@@ -116,7 +116,7 @@ defmodule Foodguy.ZomatoFetcher do
     if length(existing_cuisine_fields) == length(cuisine_names) do
       res = {:ok, existing_cuisine_fields}
     else
-      case ZomatoApi.get_url(:cuisines, params) do
+      res = case ZomatoApi.get_url(:cuisines, params) do
         {:ok, data} ->
           all_cuisines = data["cuisines"]
           new_cuisines = for cuisine <- all_cuisines,
@@ -127,9 +127,9 @@ defmodule Foodguy.ZomatoFetcher do
                                         }), 1)
 
           all_cuisine_fields = existing_cuisine_fields ++ Enum.map(new_cuisines, fn cuisine -> {cuisine.name, cuisine.external_id} end)
-          res = {:ok, all_cuisine_fields}
+          {:ok, all_cuisine_fields}
         {:error} ->
-          res = {:error, "There was an error looking for cuisines."}
+          {:error, "There was an error looking for cuisines."}
       end
     end
 

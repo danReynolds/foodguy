@@ -32,11 +32,11 @@ defmodule Foodguy.RecommendationController do
 
     if lat != "" && lon != "" do
       if sorting == "", do: sorting = "nearby"
-      case find_restaurants_by_location(lat, lon, cuisine_names, sorting) do
+      res = case find_restaurants_by_location(lat, lon, cuisine_names, sorting) do
         {:ok, restaurants} ->
-          res = format_restaurants(restaurants, list_size)
+          format_restaurants(restaurants, list_size)
         {:error, reason} ->
-          res = %{speech: reason}
+          %{speech: reason}
       end
     else
       if city_name != "" do
@@ -47,21 +47,21 @@ defmodule Foodguy.RecommendationController do
         end
       end
 
-      case data do
+      res = case data do
         {:ok, city} ->
           if sorting == "", do: sorting = "random"
           case find_restaurants_by_city(city, cuisine_names, sorting) do
             {:ok, restaurants} ->
-              res = format_restaurants(restaurants, list_size)
+              format_restaurants(restaurants, list_size)
             {:error, reason} ->
-              res = %{speech: reason}
+              %{speech: reason}
           end
         {:error, reason} ->
-          res = %{speech: reason}
+          %{speech: reason}
         {:error} ->
-          res = ask_for_location_response
+          ask_for_location_response()
         nil ->
-          res = ask_for_location_response
+          ask_for_location_response()
       end
     end
 
@@ -92,7 +92,7 @@ defmodule Foodguy.RecommendationController do
     case ZomatoFetcher.fetch_cuisines_by_location(lat, lon, cuisine_names) do
       {:ok, cuisine_ids} ->
         ZomatoFetcher.fetch_restaurants_by_location(lat, lon, sorting, cuisine_ids)
-      {:error, reason} ->
+      {:error, _reason} ->
         {:error, "There was an error looking for cuisines in your specified location."}
     end
   end
@@ -107,8 +107,6 @@ defmodule Foodguy.RecommendationController do
                                     |> Enum.map(fn restaurant -> restaurant["restaurant"]["name"] end)
                                     |> Enum.join(", ")
     formatted_rich_restaurants = for restaurant <- desired_restaurants, do: format_restaurant(restaurant["restaurant"])
-    default_response = "I recommend going to #{formatted_default_restaurants}."
-
     %{
       speech: "I recommend going to #{formatted_default_restaurants}.",
       messages: [%{type: 0, speech: "I have some recommendations!"} | formatted_rich_restaurants]
@@ -156,16 +154,10 @@ defmodule Foodguy.RecommendationController do
         "lat" => lat,
         "long" => lon
       } = location_params
-      api_params = Map.merge(
-        api_params,
-        %{"city" => "", "country" => "", "state" => "", "lat" => lat, "lon" => lon}
-      )
+      Map.merge(api_params, %{"city" => "", "country" => "", "state" => "", "lat" => lat, "lon" => lon})
     else
       if api_params["city"] != "" || api_params["country"] != "" || api_params["state"] != "" do
-        api_params = Map.merge(
-          api_params,
-          %{"lat" => "", "lon" => ""}
-        )
+        Map.merge(api_params, %{"lat" => "", "lon" => ""})
       end
     end
   end

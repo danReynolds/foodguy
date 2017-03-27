@@ -1,7 +1,6 @@
 defmodule Foodguy.CityControllerTest do
   use Foodguy.ConnCase
 
-  alias Foodguy.City
   alias Foodguy.ZomatoApi
   import Mock
 
@@ -34,7 +33,7 @@ defmodule Foodguy.CityControllerTest do
       }, {
         HTTPoison,
         [],
-        [get: fn(url) -> raise "Web Request made" end]
+        [get: fn(_) -> raise "Web Request made" end]
       }]) do
         conn = post conn, "/recommendation", body
         assert json_response(conn, 200) == test_response["value"]
