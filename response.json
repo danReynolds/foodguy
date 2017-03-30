@@ -7,7 +7,7 @@
         "messages": [
           {
             "type": 0,
-            "speech": "I have some recommendations!"
+            "speech": "I am fetching some recommendations..."
           },
           {
             "type": 1,

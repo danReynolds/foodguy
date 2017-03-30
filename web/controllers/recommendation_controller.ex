@@ -11,6 +11,10 @@ defmodule Foodguy.RecommendationController do
   use Foodguy.Web, :controller
   alias Foodguy.ZomatoFetcher
   alias Foodguy.City
+  alias Foodguy.Speech
+
+  # Timeout for a context, default on API.ai is 5 minutes
+  @context_lifespan 5
 
   @doc """
   Begins recommendation query based on request parameters and returns the speech
@@ -68,7 +72,7 @@ defmodule Foodguy.RecommendationController do
     # Sets the new context to be used by API.AI, varies based on city vs lat/lon queries
     res = Map.put(res, :contextOut, [%{
       name: "recommendation",
-      lifespan: 5,
+      lifespan: @context_lifespan,
       parameters: api_params
     }])
     json conn, res
@@ -103,7 +107,7 @@ defmodule Foodguy.RecommendationController do
     formatted_rich_restaurants = for restaurant <- desired_restaurants, do: format_restaurant(restaurant["restaurant"])
     %{
       speech: "I recommend going to #{formatted_default_restaurants}.",
-      messages: [%{type: 0, speech: "I have some recommendations!"} | formatted_rich_restaurants]
+      messages: [%{type: 0, speech: Speech.get_speech("loading")} | formatted_rich_restaurants]
     }
   end
 
@@ -125,13 +129,13 @@ defmodule Foodguy.RecommendationController do
 
   defp ask_for_location_response do
     %{
-     speech: "In what city and state or country will you be eating?",
+     speech: Speech.get_speech("location"),
      data: %{
        google: %{
          expect_user_response: true # Used to keep mic open when a response is needed
        },
        facebook: %{
-         text: "Specify your city and state or country or share your location.",
+         text: Speech.get_speech("facebook_location"),
          quick_replies: [%{content_type: "location"}]
        }
      }

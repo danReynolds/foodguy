@@ -2,6 +2,7 @@ defmodule Foodguy.CityControllerTest do
   use Foodguy.ConnCase
 
   alias Foodguy.ZomatoApi
+  alias Foodguy.Speech
   import Mock
 
   def test_data(api, test_responses, action) do
@@ -31,6 +32,11 @@ defmodule Foodguy.CityControllerTest do
         [],
         [get_url: fn(api_key, _params) -> {:ok, test_response["responses"][Atom.to_string(api_key)]} end]
       }, {
+        Speech,
+        [],
+        [get_speech: fn("loading") -> "I am fetching some recommendations..." end]
+      },
+      {
         HTTPoison,
         [],
         [get: fn(_) -> raise "Web Request made" end]
