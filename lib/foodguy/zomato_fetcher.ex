@@ -86,8 +86,8 @@ defmodule Foodguy.ZomatoFetcher do
               {:error, _changeset} ->
                 {:error, "There was a problem with the data for this city."}
             end
-          {:error, reason} ->
-            {:error, reason}
+          {:error, reason} = match_error ->
+            match_error
           {:error} = match_error ->
             match_error
         end

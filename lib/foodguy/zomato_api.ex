@@ -17,8 +17,6 @@ defmodule Foodguy.ZomatoApi do
 
     case res do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-        IO.puts("#{api_key}.json")
-        File.write!("#{api_key}.json", body)
         {:ok, Poison.Parser.parse!(body)}
       {:error, %HTTPoison.Error{reason: _reason}} ->
         {:error}
