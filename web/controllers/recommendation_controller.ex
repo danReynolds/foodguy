@@ -148,6 +148,8 @@ defmodule Foodguy.RecommendationController do
         Map.merge(api_params, %{"city" => "", "country" => "", "state" => "", "lat" => lat, "lon" => lon})
       api_params["city"] != "" || api_params["country"] != "" || api_params["state"] != "" ->
         Map.merge(api_params, %{"lat" => "", "lon" => ""})
+      true ->
+        api_params
     end
   end
 end

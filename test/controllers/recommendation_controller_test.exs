@@ -80,6 +80,22 @@ defmodule Foodguy.CityControllerTest do
 
   @tag :unit
   describe "#update_location_params/1" do
+    test "assert no city/state/country and no lat/lon returns original params" do
+      api_params = %{
+        "result" => %{
+          "parameters" => %{
+            "test" => 2,
+            "lat" => "",
+            "lon" => "",
+            "city" => "",
+            "country" => "",
+            "state" => ""
+          }
+        }
+      }
+      assert api_params["result"]["parameters"] == RecommendationController.update_location_params(api_params)
+    end
+
     test "assert sets city/state/country and clears lat/lon" do
       api_params = %{
         "result" => %{
