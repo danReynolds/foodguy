@@ -1,0 +1,18 @@
+{
+  "loading": [
+    "I am fetching some recommendations...",
+    "On it, finding recommendations...",
+    "Can do. Compiling recommendations...",
+    "Getting recommendations..."
+  ],
+  "location": [
+    "In what city and state or country will you be eating?",
+    "Which city and state or country are you looking for?",
+    "Which city and state or country are you dining in?"
+  ],
+  "facebook_location": [
+    "Specify your city and state or country or share your location.",
+    "Tell me your city and state or country or share your location.",
+    "Let me know your city and state or country or share your location."
+  ]
+}

@@ -20,6 +20,7 @@ defmodule Foodguy.ZomatoFetcher do
   restaurants and fetches them
   """
   def fetch_restaurants_by_city(id, sorting, cuisine_ids) do
+    if sorting == "", do: sorting = "random"
     sort = @sorting[String.to_atom(sorting)]
     params = %{
       entity_id: id,
@@ -36,6 +37,7 @@ defmodule Foodguy.ZomatoFetcher do
   and fetches them
   """
   def fetch_restaurants_by_location(lat, lon, sorting, cuisine_ids) do
+    if sorting == "", do: sorting = "nearby"
     sort = @sorting[String.to_atom(sorting)]
     params = %{
       lat: lat,

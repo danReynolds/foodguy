@@ -35,7 +35,6 @@ defmodule Foodguy.RecommendationController do
     list_size = String.to_integer(list_size)
 
     if lat != "" && lon != "" do
-      if sorting == "", do: sorting = "nearby"
       res = case find_restaurants_by_location(lat, lon, cuisine_names, sorting) do
         {:ok, restaurants} ->
           format_restaurants(restaurants, list_size)
@@ -53,7 +52,6 @@ defmodule Foodguy.RecommendationController do
 
       res = case data do
         {:ok, city} ->
-          if sorting == "", do: sorting = "random"
           case find_restaurants_by_city(city, cuisine_names, sorting) do
             {:ok, restaurants} ->
               format_restaurants(restaurants, list_size)
@@ -111,7 +109,7 @@ defmodule Foodguy.RecommendationController do
     }
   end
 
-  defp format_restaurant(restaurant) do
+  def format_restaurant(restaurant) do
     price = for _ <- 1..restaurant["price_range"], into: "", do: "$"
     %{
      type: 1,
@@ -127,33 +125,29 @@ defmodule Foodguy.RecommendationController do
     }
   end
 
-  defp ask_for_location_response do
+  def ask_for_location_response do
     %{
      speech: Speech.get_speech("location"),
      data: %{
-       google: %{
-         expect_user_response: true # Used to keep mic open when a response is needed
-       },
-       facebook: %{
-         text: Speech.get_speech("facebook_location"),
-         quick_replies: [%{content_type: "location"}]
-       }
-     }
-   }
+        google: %{
+          expect_user_response: true # Used to keep mic open when a response is needed
+        },
+        facebook: %{
+          text: Speech.get_speech("facebook_location"),
+          quick_replies: [%{content_type: "location"}]
+        }
+      }
+    }
   end
 
-  defp update_location_params(params) do
+  def update_location_params(params) do
     api_params = params["result"]["parameters"]
-    if location_params = params["originalRequest"]["data"]["postback"]["data"] do
-      %{
-        "lat" => lat,
-        "long" => lon
-      } = location_params
-      Map.merge(api_params, %{"city" => "", "country" => "", "state" => "", "lat" => lat, "lon" => lon})
-    else
-      if api_params["city"] != "" || api_params["country"] != "" || api_params["state"] != "" do
+    cond do
+      location_params = params["originalRequest"]["data"]["postback"]["data"] ->
+        %{ "lat" => lat, "long" => lon } = location_params
+        Map.merge(api_params, %{"city" => "", "country" => "", "state" => "", "lat" => lat, "lon" => lon})
+      api_params["city"] != "" || api_params["country"] != "" || api_params["state"] != "" ->
         Map.merge(api_params, %{"lat" => "", "lon" => ""})
-      end
     end
   end
 end
