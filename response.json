@@ -1,6 +1,41 @@
 {
   "tests": [
     {
+      "name": "assert unspecified location response",
+      "value": {
+      	"speech": "In what city and state or country will you be eating?",
+      	"data": {
+      		"google": {
+      			"expect_user_response": true
+      		},
+      		"facebook": {
+      			"text": "Tell me your city and state or country or share your location.",
+      			"quick_replies": [
+      				{
+      					"content_type": "location"
+      				}
+      			]
+      		}
+      	},
+      	"contextOut": [
+      		{
+      			"parameters": {
+      				"state": "",
+      				"sorting": "best",
+      				"lon": "",
+      				"list_size": "3",
+      				"lat": "",
+      				"cuisines": [],
+      				"country": "",
+      				"city": ""
+      			},
+      			"name": "recommendation",
+      			"lifespan": 5
+      		}
+      	]
+      }
+    },
+    {
       "name": "assert valid lat/lon response",
       "value": {
         "speech": "I recommend going to Uptown Jerk.",

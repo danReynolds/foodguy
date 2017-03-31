@@ -1,7 +1,7 @@
 {
 	"_type": "export",
 	"__export_format": 3,
-	"__export_date": "2017-03-31T01:44:30.775Z",
+	"__export_date": "2017-03-31T06:22:35.595Z",
 	"__export_source": "insomnia.desktop.app:v4.0.9",
 	"resources": [
 		{
@@ -26,7 +26,7 @@
 		{
 			"_id": "jar_942597cc7eda4b269d15830463ea2f5e",
 			"parentId": "wrk_143885a9de974e2eb0e28c54f350c9b0",
-			"modified": 1490924357279,
+			"modified": 1490940994061,
 			"created": 1488341451451,
 			"name": "Default Jar",
 			"cookies": [],
@@ -53,6 +53,29 @@
 			],
 			"authentication": {},
 			"metaSortKey": -1488341315543,
+			"_type": "request"
+		},
+		{
+			"_id": "req_1ea1a9ea7c754f919d2a012ceb69e5ae",
+			"parentId": "wrk_143885a9de974e2eb0e28c54f350c9b0",
+			"modified": 1490940898568,
+			"created": 1490940871683,
+			"url": "{{ url }}",
+			"name": "assert unspecified location response",
+			"method": "POST",
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n  \"id\": \"51f38ee4-2f80-491d-ba77-f8c48a027cfb\",\n  \"timestamp\": \"2017-03-16T18:19:52.347Z\",\n  \"lang\": \"en\",\n  \"result\": {\n    \"source\": \"agent\",\n    \"resolvedQuery\": \"food in san francisco, california\",\n    \"action\": \"recommendation\",\n    \"actionIncomplete\": false,\n    \"parameters\": {\n      \"city\": \"\",\n      \"country\": \"\",\n      \"cuisines\": [],\n      \"lat\": \"\",\n      \"list_size\": \"3\",\n      \"lon\": \"\",\n      \"sorting\": \"best\",\n      \"state\": \"\"\n    },\n    \"contexts\": [\n      {\n        \"name\": \"recommendation\",\n        \"parameters\": {\n          \"country\": \"\",\n          \"sorting.original\": \"\",\n          \"city\": \"San Francisco California\",\n          \"state.original\": \"\",\n          \"country.original\": \"\",\n          \"lon\": \"\",\n          \"city.original\": \"san francisco, california\",\n          \"list_size\": \"3\",\n          \"cuisines\": [],\n          \"cuisines.original\": \"\",\n          \"sorting\": \"\",\n          \"state\": \"\",\n          \"list_size.original\": \"\",\n          \"lon.original\": \"\",\n          \"lat\": \"\",\n          \"lat.original\": \"\"\n        },\n        \"lifespan\": 5\n      }\n    ],\n    \"metadata\": {\n      \"intentId\": \"07f0ff2a-c4c8-4b52-8d48-4f94b3115476\",\n      \"webhookUsed\": \"true\",\n      \"webhookForSlotFillingUsed\": \"false\",\n      \"intentName\": \"recommendation\"\n    },\n    \"fulfillment\": {\n      \"speech\": \"\",\n      \"messages\": [\n        {\n          \"type\": 0,\n          \"speech\": \"\"\n        }\n      ]\n    },\n    \"score\": 1\n  },\n  \"status\": {\n    \"code\": 206,\n    \"errorType\": \"partial_content\",\n    \"errorDetails\": \"Webhook call failed. Error message: Webhook response was empty. ErrorId: e5180fba-3a3c-460d-9a4b-59d21aa96aab\"\n  },\n  \"sessionId\": \"fce4625a-541e-4351-87bd-f280a081855d\"\n}"
+			},
+			"parameters": [],
+			"headers": [
+				{
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"authentication": {},
+			"metaSortKey": -1490940871683,
 			"_type": "request"
 		},
 		{

@@ -66,7 +66,7 @@ defmodule Foodguy.CityControllerTest do
          speech: messages["location"],
          data: %{
             google: %{
-              expect_user_response: true # Used to keep mic open when a response is needed
+              expect_user_response: true
             },
             facebook: %{
               text: messages["facebook_location"],
@@ -153,6 +153,11 @@ defmodule Foodguy.CityControllerTest do
   @tag :integration
   describe "POST recommendation/2" do
     test "assert valid responses", %{conn: conn, api: api, test_responses: test_responses} do
+      speeches = %{
+        "loading" => "I am fetching some recommendations...",
+        "location" => "In what city and state or country will you be eating?",
+        "facebook_location" => "Tell me your city and state or country or share your location."
+      }
       Enum.each(test_responses, fn(response) ->
         %{body: body, test_response: test_response} = test_data(api, test_responses, response["name"])
         with_mocks([{
@@ -162,7 +167,7 @@ defmodule Foodguy.CityControllerTest do
         }, {
           Speech,
           [],
-          [get_speech: fn("loading") -> "I am fetching some recommendations..." end]
+          [get_speech: fn(key) -> speeches[key] end]
         },
         {
           HTTPoison,
