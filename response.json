@@ -1,7 +1,448 @@
 {
   "tests": [
     {
-      "name": "assert valid response",
+      "name": "assert valid lat/lon response",
+      "value": {
+        "speech": "I recommend going to Uptown Jerk.",
+        "messages": [
+          {
+            "type": 0,
+            "speech": "I am fetching some recommendations..."
+          },
+          {
+            "type": 1,
+            "title": "Uptown Jerk",
+            "subtitle": "Rating: 0, Price: $$",
+            "imageUrl": "",
+            "buttons": [
+              {
+                "text": "View Restaurant",
+                "postback": "https://www.zomato.com/waterloo-on/uptown-jerk-waterloo-waterloo?utm_source=api_basic_user&utm_medium=api&utm_campaign=v2.1"
+              }
+            ]
+          }
+        ],
+        "contextOut": [
+          {
+            "parameters": {
+              "state": "",
+              "sorting": "best",
+              "lon": -80.5204,
+              "list_size": "3",
+              "lat": 43.4643,
+              "cuisines": [
+                "Jamaican"
+              ],
+              "country": "",
+              "city": ""
+            },
+            "name": "recommendation",
+            "lifespan": 5
+          }
+        ]
+      },
+      "responses": {
+        "restaurants": {
+          "results_found": 1,
+          "results_start": 0,
+          "results_shown": 1,
+          "restaurants": [
+            {
+              "restaurant": {
+                "R": {
+                  "res_id": 18415452
+                },
+                "apikey": "b1f615500795a34c92f4de49eba269a8",
+                "id": "18415452",
+                "name": "Uptown Jerk",
+                "url": "https://www.zomato.com/waterloo-on/uptown-jerk-waterloo-waterloo?utm_source=api_basic_user&utm_medium=api&utm_campaign=v2.1",
+                "location": {
+                  "address": "220 King Street North, Unit D , Waterloo, Ontario N2J 2Y7",
+                  "locality": "Waterloo",
+                  "city": "Waterloo",
+                  "city_id": 3459,
+                  "latitude": "43.4752548396",
+                  "longitude": "-80.5240462113",
+                  "zipcode": "N2J 2Y7",
+                  "country_id": 37,
+                  "locality_verbose": "Waterloo, Waterloo"
+                },
+                "switch_to_order_menu": 0,
+                "cuisines": "Caribbean, Jamaican",
+                "average_cost_for_two": 20,
+                "price_range": 2,
+                "currency": "$",
+                "offers": [],
+                "thumb": "",
+                "user_rating": {
+                  "aggregate_rating": "0",
+                  "rating_text": "Not rated",
+                  "rating_color": "CBCBC8",
+                  "votes": "1"
+                },
+                "photos_url": "https://www.zomato.com/waterloo-on/uptown-jerk-waterloo-waterloo/photos?utm_source=api_basic_user&utm_medium=api&utm_campaign=v2.1#tabtop",
+                "menu_url": "https://www.zomato.com/waterloo-on/uptown-jerk-waterloo-waterloo/menu?utm_source=api_basic_user&utm_medium=api&utm_campaign=v2.1&openSwipeBox=menu&showMinimal=1#tabtop",
+                "featured_image": "",
+                "has_online_delivery": 0,
+                "is_delivering_now": 0,
+                "deeplink": "zomato://restaurant/18415452",
+                "has_table_booking": 0,
+                "events_url": "https://www.zomato.com/waterloo-on/uptown-jerk-waterloo-waterloo/events#tabtop?utm_source=api_basic_user&utm_medium=api&utm_campaign=v2.1",
+                "establishment_types": []
+              }
+            }
+          ]
+        },
+        "cuisines": {
+          "cuisines": [
+            {
+              "cuisine": {
+                "cuisine_id": 1,
+                "cuisine_name": "American"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 3,
+                "cuisine_name": "Asian"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 193,
+                "cuisine_name": "BBQ"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 5,
+                "cuisine_name": "Bakery"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 227,
+                "cuisine_name": "Bar Food"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 132,
+                "cuisine_name": "Belgian"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 270,
+                "cuisine_name": "Beverages"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 182,
+                "cuisine_name": "Breakfast"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 133,
+                "cuisine_name": "British"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 247,
+                "cuisine_name": "Bubble Tea"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 168,
+                "cuisine_name": "Burger"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 30,
+                "cuisine_name": "Cafe"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 381,
+                "cuisine_name": "Canadian"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 158,
+                "cuisine_name": "Caribbean"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 25,
+                "cuisine_name": "Chinese"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 161,
+                "cuisine_name": "Coffee and Tea"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 100,
+                "cuisine_name": "Desserts"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 411,
+                "cuisine_name": "Dim Sum"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 541,
+                "cuisine_name": "Diner"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 40,
+                "cuisine_name": "Fast Food"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 298,
+                "cuisine_name": "Fish and Chips"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 45,
+                "cuisine_name": "French"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 501,
+                "cuisine_name": "Frozen Yogurt"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 134,
+                "cuisine_name": "German"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 181,
+                "cuisine_name": "Grill"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 143,
+                "cuisine_name": "Healthy Food"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 233,
+                "cuisine_name": "Ice Cream"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 148,
+                "cuisine_name": "Indian"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 154,
+                "cuisine_name": "International"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 55,
+                "cuisine_name": "Italian"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 207,
+                "cuisine_name": "Jamaican"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 60,
+                "cuisine_name": "Japanese"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 67,
+                "cuisine_name": "Korean"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 102,
+                "cuisine_name": "Maharashtrian"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 70,
+                "cuisine_name": "Mediterranean"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 73,
+                "cuisine_name": "Mexican"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 137,
+                "cuisine_name": "Middle Eastern"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 294,
+                "cuisine_name": "Modern European"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 74,
+                "cuisine_name": "Mongolian"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 50,
+                "cuisine_name": "North Indian"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 110,
+                "cuisine_name": "Others"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 183,
+                "cuisine_name": "Patisserie"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 82,
+                "cuisine_name": "Pizza"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 983,
+                "cuisine_name": "Pub Food"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 320,
+                "cuisine_name": "Ramen"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 304,
+                "cuisine_name": "Sandwich"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 83,
+                "cuisine_name": "Seafood"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 831,
+                "cuisine_name": "Shanghai"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 461,
+                "cuisine_name": "Soul Food"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 141,
+                "cuisine_name": "Steak"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 177,
+                "cuisine_name": "Sushi"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 212,
+                "cuisine_name": "Syrian"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 190,
+                "cuisine_name": "Taiwanese"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 163,
+                "cuisine_name": "Tea"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 95,
+                "cuisine_name": "Thai"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 308,
+                "cuisine_name": "Vegetarian"
+              }
+            },
+            {
+              "cuisine": {
+                "cuisine_id": 99,
+                "cuisine_name": "Vietnamese"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "assert valid city/state/country response",
       "value": {
         "speech": "I recommend going to Tartine Bakery, Ghirardelli Ice Cream and Chocolate Shop, Delfina.",
         "messages": [

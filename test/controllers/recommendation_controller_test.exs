@@ -136,25 +136,27 @@ defmodule Foodguy.CityControllerTest do
 
   @tag :integration
   describe "POST recommendation/2" do
-    test "assert valid response", %{conn: conn, api: api, test_responses: test_responses} do
-      %{body: body, test_response: test_response} = test_data(api, test_responses, "assert valid response")
-      with_mocks([{
-        ZomatoApi,
-        [],
-        [get_url: fn(api_key, _params) -> {:ok, test_response["responses"][Atom.to_string(api_key)]} end]
-      }, {
-        Speech,
-        [],
-        [get_speech: fn("loading") -> "I am fetching some recommendations..." end]
-      },
-      {
-        HTTPoison,
-        [],
-        [get: fn(_) -> raise "Web Request made" end]
-      }]) do
-        conn = post conn, "/recommendation", body
-        assert json_response(conn, 200) == test_response["value"]
-      end
+    test "assert valid responses", %{conn: conn, api: api, test_responses: test_responses} do
+      Enum.each(test_responses, fn(response) ->
+        %{body: body, test_response: test_response} = test_data(api, test_responses, response["name"])
+        with_mocks([{
+          ZomatoApi,
+          [],
+          [get_url: fn(api_key, _params) -> {:ok, test_response["responses"][Atom.to_string(api_key)]} end]
+        }, {
+          Speech,
+          [],
+          [get_speech: fn("loading") -> "I am fetching some recommendations..." end]
+        },
+        {
+          HTTPoison,
+          [],
+          [get: fn(_) -> raise "Web Request made" end]
+        }]) do
+          conn = post conn, "/recommendation", body
+          assert json_response(conn, 200) == test_response["value"]
+        end
+      end)
     end
   end
 end

@@ -1,7 +1,7 @@
 {
 	"_type": "export",
 	"__export_format": 3,
-	"__export_date": "2017-03-27T21:17:31.671Z",
+	"__export_date": "2017-03-31T01:44:30.775Z",
 	"__export_source": "insomnia.desktop.app:v4.0.9",
 	"resources": [
 		{
@@ -26,7 +26,7 @@
 		{
 			"_id": "jar_942597cc7eda4b269d15830463ea2f5e",
 			"parentId": "wrk_143885a9de974e2eb0e28c54f350c9b0",
-			"modified": 1490649309568,
+			"modified": 1490924357279,
 			"created": 1488341451451,
 			"name": "Default Jar",
 			"cookies": [],
@@ -35,10 +35,10 @@
 		{
 			"_id": "req_1bc65abceb8f4b1c96a565c8f8f55209",
 			"parentId": "wrk_143885a9de974e2eb0e28c54f350c9b0",
-			"modified": 1490648987921,
+			"modified": 1490922358907,
 			"created": 1488341315543,
 			"url": "{{ url }}",
-			"name": "assert valid response",
+			"name": "assert valid city/state/country response",
 			"method": "POST",
 			"body": {
 				"mimeType": "application/json",
@@ -53,6 +53,29 @@
 			],
 			"authentication": {},
 			"metaSortKey": -1488341315543,
+			"_type": "request"
+		},
+		{
+			"_id": "req_81850edbcbce4c51b8a321b9df8b677f",
+			"parentId": "wrk_143885a9de974e2eb0e28c54f350c9b0",
+			"modified": 1490924350205,
+			"created": 1490921438168,
+			"url": "{{ url }}",
+			"name": "assert valid lat/lon response",
+			"method": "POST",
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n  \"id\": \"51f38ee4-2f80-491d-ba77-f8c48a027cfb\",\n  \"timestamp\": \"2017-03-16T18:19:52.347Z\",\n  \"lang\": \"en\",\n  \"originalRequest\": {\n\t  \"data\": {\n\t\t  \"postback\": {\n\t\t\t  \"data\": {\n\t\t\t\t  \"lat\": 43.4643,\n\t\t\t\t  \"long\": -80.5204\n\t\t\t  }\n\t\t  }\n\t  }\n  },\n  \"result\": {\n    \"source\": \"agent\",\n    \"resolvedQuery\": \"food in san francisco, california\",\n    \"action\": \"recommendation\",\n    \"actionIncomplete\": false,\n    \"parameters\": {\n      \"city\": \"\",\n      \"country\": \"\",\n      \"cuisines\": [\"Jamaican\"],\n      \"lat\": \"\",\n      \"list_size\": \"3\",\n      \"lon\": \"\",\n      \"sorting\": \"best\",\n      \"state\": \"\"\n    },\n    \"contexts\": [\n      {\n        \"name\": \"recommendation\",\n        \"parameters\": {\n          \"country\": \"\",\n          \"sorting.original\": \"\",\n          \"city\": \"San Francisco California\",\n          \"state.original\": \"\",\n          \"country.original\": \"\",\n          \"lon\": \"\",\n          \"city.original\": \"san francisco, california\",\n          \"list_size\": \"3\",\n          \"cuisines\": [],\n          \"cuisines.original\": \"\",\n          \"sorting\": \"\",\n          \"state\": \"\",\n          \"list_size.original\": \"\",\n          \"lon.original\": \"\",\n          \"lat\": \"\",\n          \"lat.original\": \"\"\n        },\n        \"lifespan\": 5\n      }\n    ],\n    \"metadata\": {\n      \"intentId\": \"07f0ff2a-c4c8-4b52-8d48-4f94b3115476\",\n      \"webhookUsed\": \"true\",\n      \"webhookForSlotFillingUsed\": \"false\",\n      \"intentName\": \"recommendation\"\n    },\n    \"fulfillment\": {\n      \"speech\": \"\",\n      \"messages\": [\n        {\n          \"type\": 0,\n          \"speech\": \"\"\n        }\n      ]\n    },\n    \"score\": 1\n  },\n  \"status\": {\n    \"code\": 206,\n    \"errorType\": \"partial_content\",\n    \"errorDetails\": \"Webhook call failed. Error message: Webhook response was empty. ErrorId: e5180fba-3a3c-460d-9a4b-59d21aa96aab\"\n  },\n  \"sessionId\": \"fce4625a-541e-4351-87bd-f280a081855d\"\n}"
+			},
+			"parameters": [],
+			"headers": [
+				{
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"authentication": {},
+			"metaSortKey": -1490921438168,
 			"_type": "request"
 		},
 		{
