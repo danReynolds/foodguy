@@ -479,7 +479,7 @@
     {
       "name": "assert valid city/state/country response",
       "value": {
-        "speech": "I recommend going to Tartine Bakery, Ghirardelli Ice Cream and Chocolate Shop, Delfina.",
+        "speech": "I recommend going to Tartine Bakery, Ghirardelli Ice Cream and Chocolate Shop, or Delfina.",
         "messages": [
           {
             "type": 0,

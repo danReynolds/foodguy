@@ -99,9 +99,15 @@ defmodule Foodguy.RecommendationController do
 
   defp format_restaurants(restaurants, list_size) do
     desired_restaurants = Enum.take(restaurants, list_size)
-    formatted_default_restaurants = desired_restaurants
-                                    |> Enum.map(fn restaurant -> restaurant["restaurant"]["name"] end)
-                                    |> Enum.join(", ")
+    formatted_default_restaurants = Enum.map(desired_restaurants, fn restaurant ->
+      name = restaurant["restaurant"]["name"]
+      if length(desired_restaurants) > 1 && restaurant == List.last(desired_restaurants) do
+        "or #{name}"
+      else
+        name
+      end
+    end) |> Enum.join(", ")
+
     formatted_rich_restaurants = for restaurant <- desired_restaurants, do: format_restaurant(restaurant["restaurant"])
     %{
       speech: "I recommend going to #{formatted_default_restaurants}.",
