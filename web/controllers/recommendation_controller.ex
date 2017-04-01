@@ -80,7 +80,7 @@ defmodule Foodguy.RecommendationController do
     case ZomatoFetcher.fetch_cuisines_by_city(city.external_id, cuisine_names) do
       {:ok, cuisine_ids} ->
         ZomatoFetcher.fetch_restaurants_by_city(city.external_id, sorting, cuisine_ids)
-      {:error, error} = restaurant_error ->
+      {:error, _} = restaurant_error ->
         restaurant_error
     end
   end
@@ -88,7 +88,7 @@ defmodule Foodguy.RecommendationController do
   @doc """
   Fetches restaurants based on provided cuisines for a given lat/lon and returns the restaurants
   """
-  defp find_restaurants_by_location(lat, lon, cuisine_names, sorting) do
+  def find_restaurants_by_location(lat, lon, cuisine_names, sorting) do
     case ZomatoFetcher.fetch_cuisines_by_location(lat, lon, cuisine_names) do
       {:ok, cuisine_ids} ->
         ZomatoFetcher.fetch_restaurants_by_location(lat, lon, sorting, cuisine_ids)
